@@ -1,12 +1,11 @@
 ## Box with particles
-# First attempt at building the within territoy system
 
 random_seed 1
 
 graphics opengl_good
 
 dim 2
-species AA AB BB AAAA AAAB ABBB BBBB food AAfull AAhungry ABfull ABhungry BBfull BBhungry
+species AA AB BB AAAA AAAB ABAB ABBB BBBB food AAfull AAhungry ABfull ABhungry BBfull BBhungry
 
 time_start 0
 time_stop 10000
@@ -53,6 +52,9 @@ variable offspring = 1000
 reaction offspring1 AAAA -> AA + AA + AA offspring
 reaction offspring2a AAAB -> AA + AB + AA offspring
 reaction offspring2b AAAB -> AA + AB + AB offspring
+reaction offspring3a ABAB -> AA + AB + AB 2*offspring
+reaction offspring3b ABAB -> AA + AB + AA offspring
+reaction offspring3b ABAB -> AA + AB + BB offspring
 reaction offspring3a ABBB -> AB + BB + AB offspring
 reaction offspring3s ABBB -> AB + BB + BB offspring
 reaction offspring4 BBBB -> BB + BB + BB offspring
