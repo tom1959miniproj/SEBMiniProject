@@ -1,4 +1,5 @@
-# Box with particles
+## Box with particles
+# First attempt at building the within territoy system
 
 random_seed 1
 
