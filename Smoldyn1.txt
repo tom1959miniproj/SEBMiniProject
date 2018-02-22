@@ -1,0 +1,86 @@
+# Box with particles
+
+random_seed 1
+
+graphics opengl_good
+
+dim 2
+species AA AB BB AAAA AAAB ABBB BBBB food AAfull AAhungry ABfull ABhungry BBfull BBhungry
+
+time_start 0
+time_stop 10000
+time_step 0.01
+
+color AA red
+color AB orange
+color BB yellow
+color food green 
+
+display_size all 1
+
+boundaries x -50 50 r
+boundaries y -50 50 r
+
+mol 10 AA u u
+mol 10 AB u u
+mol 10 BB u u
+mol 200 food u u
+
+variable x = 200
+
+difc AA x
+difc AB x
+difc BB x
+difc AAfull x
+difc ABfull x
+difc BBfull x
+difc AAhungry x
+difc ABhungry x
+difc BBhungry x
+
+reaction foodproduction 0 -> food 0.0001
+
+variable mating = 10
+
+reaction mating1 AA + AA -> AAAA mating
+reaction mating2 AA + AB -> AAAB mating
+reaction mating3 AB + BB -> ABBB mating
+reaction mating4 BB + BB -> BBBB mating
+
+variable offspring = 1000
+
+reaction offspring1 AAAA -> AA + AA + AA offspring
+reaction offspring2a AAAB -> AA + AB + AA offspring
+reaction offspring2b AAAB -> AA + AB + AB offspring
+reaction offspring3a ABBB -> AB + BB + AB offspring
+reaction offspring3s ABBB -> AB + BB + BB offspring
+reaction offspring4 BBBB -> BB + BB + BB offspring
+
+variable eating = 10
+
+reaction foodAA AA + food -> AAfull eating
+reaction foodAB AB + food -> ABfull eating
+reaction foodBB BB + food -> BBfull eating
+
+reaction foodAAhungry AAhungry + food -> AA eating
+reaction foodABhungry ABhungry + food -> AB eating
+reaction foodBBhungry BBhungry + food -> BB eating
+
+reaction hungryAAfull AAfull -> AA 0.1
+reaction hungryABfull ABfull -> AB 0.1
+reaction hungryBBfull BBfull -> BB 0.1
+
+reaction hungryAA AA -> AAhungry 0.1
+reaction hungryAB AB -> ABhungry 0.1
+reaction hungryBB BB -> BBhungry 0.1
+
+reaction hungryAAhungry AAhungry -> 0 0.01
+reaction hungryABhungry ABhungry -> 0 0.01
+reaction hungryBBhungry BBhungry -> 0 0.01
+
+cmd b pause
+
+# output_files test.txt
+# cmd i 0 10000 1 molcount test.txt
+
+end_file
