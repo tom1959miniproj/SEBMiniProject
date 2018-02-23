@@ -5,11 +5,11 @@ random_seed 1
 graphics opengl_good
 
 dim 2
-species AA AB BB AAAA AAAB ABAB ABBB BBBB food AAfull AAhungry ABfull ABhungry BBfull BBhungry
+species AA AAfull AAhungry AB ABfull ABhungry BB BBfull BBhungry AAAA AAAB ABAB ABBB BBBB food    
 
 time_start 0
-time_stop 10000
-time_step 0.01
+time_stop 40000
+time_step 0.1
 
 color AA red
 color AB orange
@@ -21,12 +21,12 @@ display_size all 1
 boundaries x -50 50 r
 boundaries y -50 50 r
 
-mol 10 AA u u
-mol 10 AB u u
-mol 10 BB u u
+mol 20 AA u u
+mol 20 AB u u
+mol 20 BB u u
 mol 200 food u u
 
-variable x = 200
+variable x = 100
 
 difc AA x
 difc AB x
@@ -38,28 +38,38 @@ difc AAhungry x
 difc ABhungry x
 difc BBhungry x
 
-reaction foodproduction 0 -> food 0.0001
+reaction foodproduction 0 -> food 1e-5
 
-variable mating = 10
+define matingbaseprob 10^-4
+define s1 2.4
+define s2 0
+define s3 0
 
-reaction mating1 AA + AA -> AAAA mating
-reaction mating2 AA + AB -> AAAB mating
-reaction mating3 AB + BB -> ABBB mating
-reaction mating4 BB + BB -> BBBB mating
+variable mating1rate = ((1+s1)^2)*matingbaseprob
+variable mating2rate = (1+s1)*(1+s2)*matingbaseprob
+variable mating3rate = ((1+s2)^2)*matingbaseprob
+variable mating4rate = (1+s2)*(1+s3)*matingbaseprob
+variable mating5rate = ((1+s3)^2)*matingbaseprob
 
-variable offspring = 1000
+reaction mating1 AA + AA -> AAAA mating1rate
+reaction mating2 AA + AB -> AAAB mating2rate
+reaction mating3 AB + AB -> ABAB mating3rate
+reaction mating4 AB + BB -> ABBB mating4rate
+reaction mating5 BB + BB -> BBBB mating5rate
+
+variable offspring = 0.1
 
 reaction offspring1 AAAA -> AA + AA + AA offspring
-reaction offspring2a AAAB -> AA + AB + AA offspring
-reaction offspring2b AAAB -> AA + AB + AB offspring
-reaction offspring3a ABAB -> AA + AB + AB 2*offspring
-reaction offspring3b ABAB -> AA + AB + AA offspring
-reaction offspring3b ABAB -> AA + AB + BB offspring
-reaction offspring3a ABBB -> AB + BB + AB offspring
-reaction offspring3s ABBB -> AB + BB + BB offspring
-reaction offspring4 BBBB -> BB + BB + BB offspring
+reaction offspring2a AAAB -> AA + AB + AA 0.5*offspring
+reaction offspring2b AAAB -> AA + AB + AB 0.5*offspring
+reaction offspring3a ABAB -> AA + AB + AB 0.5*offspring
+reaction offspring3b ABAB -> AA + AB + AA 0.25*offspring
+reaction offspring3c ABAB -> AA + AB + BB 0.25*offspring
+reaction offspring4a ABBB -> AB + BB + AB 0.5*offspring
+reaction offspring4b ABBB -> AB + BB + BB 0.5*offspring
+reaction offspring5 BBBB -> BB + BB + BB offspring
 
-variable eating = 10
+variable eating = 1e-3
 
 reaction foodAA AA + food -> AAfull eating
 reaction foodAB AB + food -> ABfull eating
@@ -69,21 +79,25 @@ reaction foodAAhungry AAhungry + food -> AA eating
 reaction foodABhungry ABhungry + food -> AB eating
 reaction foodBBhungry BBhungry + food -> BB eating
 
-reaction hungryAAfull AAfull -> AA 0.1
-reaction hungryABfull ABfull -> AB 0.1
-reaction hungryBBfull BBfull -> BB 0.1
+variable appetite = 1e-3
 
-reaction hungryAA AA -> AAhungry 0.1
-reaction hungryAB AB -> ABhungry 0.1
-reaction hungryBB BB -> BBhungry 0.1
+reaction hungryAAfull AAfull -> AA appetite
+reaction hungryABfull ABfull -> AB appetite
+reaction hungryBBfull BBfull -> BB appetite
 
-reaction hungryAAhungry AAhungry -> 0 0.01
-reaction hungryABhungry ABhungry -> 0 0.01
-reaction hungryBBhungry BBhungry -> 0 0.01
+reaction hungryAA AA -> AAhungry appetite
+reaction hungryAB AB -> ABhungry appetite
+reaction hungryBB BB -> BBhungry appetite
+
+variable death = 1e-5
+
+reaction hungryAAhungry AAhungry -> 0 death
+reaction hungryABhungry ABhungry -> 0 death
+reaction hungryBBhungry BBhungry -> 0 death
 
 cmd b pause
 
 # output_files test.txt
-# cmd i 0 10000 1 molcount test.txt
+# cmd i 0 40000 10 molcount test.txt
 
 end_file
