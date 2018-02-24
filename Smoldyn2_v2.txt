@@ -1,0 +1,128 @@
+## Box with particles
+
+random_seed 1
+
+#graphics opengl_good
+
+dim 2
+species AA AAfull AAhungry AB ABfull ABhungry BB BBfull BBhungry AAAA AAAB ABAB AABB ABBB BBBB food foods  
+
+time_start 0
+time_stop 50000
+time_step 0.1
+
+color AA red
+color AAfull blue
+color AAhungry purple
+color AB orange
+color ABfull orange
+color ABhungry orange
+color BB yellow
+color BBfull yellow
+color BBhungry yellow
+color food green 
+color foods green 
+
+display_size all 2
+display_size food 0.5
+display_size foods 0.5
+
+boundaries x -50 50 r
+boundaries y -50 50 r
+
+
+mol 20 AAhungry u u
+mol 0 ABhungry u u
+mol 20 BBhungry u u
+mol 75 food u u
+
+variable norm = 1
+variable full = 0.5
+variable hangry = 1.5
+
+difc AA norm
+difc AB norm
+difc BB norm
+difc AAfull full
+difc ABfull full
+difc BBfull full
+difc AAhungry hangry
+difc ABhungry hangry
+difc BBhungry hangry
+
+reaction foodproduction 0 -> food 10^-5
+reaction decay food -> 0 10^-4
+
+define matingbaseprob 10^-1
+define s1 1
+define s2 1
+define s3 1
+
+variable mating1rate = (s1^2)*matingbaseprob
+variable mating2rate = s1*s2*matingbaseprob
+variable mating3rate = s1*s3*matingbaseprob
+variable mating4rate = (s2^2)*matingbaseprob
+variable mating5rate = s2*s3*matingbaseprob
+variable mating6rate = (s3^2)*matingbaseprob
+
+reaction mating1 AAfull + AAfull -> AAAA mating1rate
+reaction mating2 AAfull + ABfull -> AAAB mating2rate
+reaction mating3 AAfull + BBfull -> AABB mating3rate
+reaction mating4 ABfull + ABfull -> ABAB mating4rate
+reaction mating5 ABfull + BBfull -> ABBB mating5rate
+reaction mating6 BBfull + BBfull -> BBBB mating6rate
+
+define offspring 1
+
+# Treating offspring as hungry to have high chance of death in 'juvenile' period
+
+variable offfive = 0.5*offspring
+variable offtwo = 0.25*offspring  
+
+reaction offspring1 AAAA -> AAhungry + AAhungry + AAhungry offspring
+reaction offspring2b AAAB -> AAhungry + ABhungry + ABhungry offfive
+reaction offspring2a AAAB -> AAhungry + ABhungry + AAhungry offfive
+reaction offspring3a ABAB -> ABhungry + ABhungry + ABhungry offfive
+reaction offspring3c ABAB -> ABhungry + ABhungry + BBhungry offtwo
+reaction offspring3b ABAB -> ABhungry + ABhungry + AAhungry offtwo
+reaction offspring4b ABBB -> ABhungry + BBhungry + BBhungry offfive
+reaction offspring4a ABBB -> ABhungry + BBhungry + ABhungry offfive
+reaction offspring5 BBBB -> BBhungry + BBhungry + BBhungry offspring
+reaction offspring6 AABB -> AAhungry + BBhungry + ABhungry offspring
+
+variable eating = 10^-3 #3
+
+reaction foodAA AAhungry + food -> AAfull eating
+reaction foodAB ABhungry + food -> ABfull eating
+reaction foodBB BBhungry + food -> BBfull eating
+
+
+#reaction foodAAhungry AAhungry + food -> AA eating
+#reaction foodABhungry ABhungry + food -> AB eating
+#reaction foodBBhungry BBhungry + food -> BB eating
+
+
+variable appetite = 10^-3 # 3
+
+reaction hungryAAfull AAfull -> AAhungry appetite
+reaction hungryABfull ABfull -> ABhungry appetite
+reaction hungryBBfull BBfull -> BBhungry appetite
+
+
+#reaction hungryAA AA -> AAhungry appetite
+#reaction hungryAB AB -> ABhungry appetite
+#reaction hungryBB BB -> BBhungry appetite
+
+
+variable death = 10^-4 # 5
+
+reaction hungryAAhungry AAhungry -> 0 death
+reaction hungryABhungry ABhungry -> 0 death
+reaction hungryBBhungry BBhungry -> 0 death
+
+#cmd b pause
+
+output_files test.txt
+cmd i 0 40000 10 molcount test.txt
+
+end_file
