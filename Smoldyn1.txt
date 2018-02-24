@@ -2,74 +2,95 @@
 
 random_seed 1
 
-graphics opengl_good
+# graphics opengl_good
 
 dim 2
-species AA AAfull AAhungry AB ABfull ABhungry BB BBfull BBhungry AAAA AAAB ABAB ABBB BBBB food    
+species AA AAfull AAhungry AB ABfull ABhungry BB BBfull BBhungry AAAA AAAB ABAB AABB ABBB BBBB food foods  
 
 time_start 0
-time_stop 40000
+time_stop 100000
 time_step 0.1
 
 color AA red
+color AAfull red
+color AAhungry red
 color AB orange
+color ABfull orange
+color ABhungry orange
 color BB yellow
+color BBfull yellow
+color BBhungry yellow
 color food green 
+color foods green 
 
-display_size all 1
+display_size all 2
+display_size food 0.5
+display_size foods 0.5
 
 boundaries x -50 50 r
 boundaries y -50 50 r
 
+
 mol 20 AA u u
-mol 20 AB u u
+mol 0 AB u u
 mol 20 BB u u
-mol 200 food u u
+mol 75 food u u
 
-variable x = 100
+variable norm = 1
+variable full = 0.5
+variable hangry = 1.5
 
-difc AA x
-difc AB x
-difc BB x
-difc AAfull x
-difc ABfull x
-difc BBfull x
-difc AAhungry x
-difc ABhungry x
-difc BBhungry x
+difc AA norm
+difc AB norm
+difc BB norm
+difc AAfull full
+difc ABfull full
+difc BBfull full
+difc AAhungry hangry
+difc ABhungry hangry
+difc BBhungry hangry
 
-reaction foodproduction 0 -> food 1e-5
+reaction foodproduction 0 -> food 10^-5
+reaction decay food -> 0 10^-4
 
-define matingbaseprob 10^-4
-define s1 2.4
-define s2 0
-define s3 0
+define matingbaseprob 10^-1
+define s1 1
+define s2 1
+define s3 1
 
-variable mating1rate = ((1+s1)^2)*matingbaseprob
-variable mating2rate = (1+s1)*(1+s2)*matingbaseprob
-variable mating3rate = ((1+s2)^2)*matingbaseprob
-variable mating4rate = (1+s2)*(1+s3)*matingbaseprob
-variable mating5rate = ((1+s3)^2)*matingbaseprob
+variable mating1rate = (s1^2)*matingbaseprob
+variable mating2rate = s1*s2*matingbaseprob
+variable mating3rate = s1*s3*matingbaseprob
+variable mating4rate = (s2^2)*matingbaseprob
+variable mating5rate = s2*s3*matingbaseprob
+variable mating6rate = (s3^2)*matingbaseprob
 
-reaction mating1 AA + AA -> AAAA mating1rate
-reaction mating2 AA + AB -> AAAB mating2rate
-reaction mating3 AB + AB -> ABAB mating3rate
-reaction mating4 AB + BB -> ABBB mating4rate
-reaction mating5 BB + BB -> BBBB mating5rate
+reaction mating1 AAfull + AAfull -> AAAA mating1rate
+reaction mating2 AAfull + ABfull -> AAAB mating2rate
+reaction mating3 AAfull + BBfull -> AABB mating3rate
+reaction mating4 ABfull + ABfull -> ABAB mating4rate
+reaction mating5 ABfull + BBfull -> ABBB mating5rate
+reaction mating6 BBfull + BBfull -> BBBB mating6rate
 
-variable offspring = 0.1
+define offspring 1
 
-reaction offspring1 AAAA -> AA + AA + AA offspring
-reaction offspring2a AAAB -> AA + AB + AA 0.5*offspring
-reaction offspring2b AAAB -> AA + AB + AB 0.5*offspring
-reaction offspring3a ABAB -> AA + AB + AB 0.5*offspring
-reaction offspring3b ABAB -> AA + AB + AA 0.25*offspring
-reaction offspring3c ABAB -> AA + AB + BB 0.25*offspring
-reaction offspring4a ABBB -> AB + BB + AB 0.5*offspring
-reaction offspring4b ABBB -> AB + BB + BB 0.5*offspring
-reaction offspring5 BBBB -> BB + BB + BB offspring
+# Treating offspring as hungry to have high chance of death in 'juvenile' period
 
-variable eating = 1e-3
+variable offfive = 0.5*offspring
+variable offtwo = 0.25*offspring  
+
+reaction offspring1 AAAA -> AA + AA + AAhungry offspring
+reaction offspring2b AAAB -> AA + AB + ABhungry offfive
+reaction offspring2a AAAB -> AA + AB + AAhungry offfive
+reaction offspring3a ABAB -> AB + AB + ABhungry offfive
+reaction offspring3c ABAB -> AB + AB + BBhungry offtwo
+reaction offspring3b ABAB -> AB + AB + AAhungry offtwo
+reaction offspring4b ABBB -> AB + BB + BBhungry offfive
+reaction offspring4a ABBB -> AB + BB + ABhungry offfive
+reaction offspring5 BBBB -> BB + BB + BBhungry offspring
+reaction offspring6 AABB -> AA + BB + ABhungry offspring
+
+variable eating = 10^-3 #3
 
 reaction foodAA AA + food -> AAfull eating
 reaction foodAB AB + food -> ABfull eating
@@ -79,7 +100,7 @@ reaction foodAAhungry AAhungry + food -> AA eating
 reaction foodABhungry ABhungry + food -> AB eating
 reaction foodBBhungry BBhungry + food -> BB eating
 
-variable appetite = 1e-3
+variable appetite = 10^-3 # 3
 
 reaction hungryAAfull AAfull -> AA appetite
 reaction hungryABfull ABfull -> AB appetite
@@ -89,15 +110,15 @@ reaction hungryAA AA -> AAhungry appetite
 reaction hungryAB AB -> ABhungry appetite
 reaction hungryBB BB -> BBhungry appetite
 
-variable death = 1e-5
+variable death = 10^-4 # 5
 
 reaction hungryAAhungry AAhungry -> 0 death
 reaction hungryABhungry ABhungry -> 0 death
 reaction hungryBBhungry BBhungry -> 0 death
 
-cmd b pause
+#cmd b pause
 
-# output_files test.txt
-# cmd i 0 40000 10 molcount test.txt
+output_files test.txt
+cmd i 0 40000 10 molcount test.txt
 
 end_file
