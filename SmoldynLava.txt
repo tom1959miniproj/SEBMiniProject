@@ -1,0 +1,216 @@
+## Box with particles
+
+random_seed 1
+
+graphics opengl_good
+
+dim 2
+species AAfull AAhungry ABfull ABhungry BBfull BBhungry AAAA AAAB ABAB AABB ABBB BBBB food  
+
+time_start 0
+time_stop 100000
+time_step 0.1
+
+color AAfull blue
+color AAhungry blue
+color ABfull red
+color ABhungry red
+color BBfull yellow
+color BBhungry yellow
+color food green 
+color foods green 
+
+display_size all 2
+display_size food 0.5
+display_size foods 0.5
+
+boundaries x -50 250 r
+boundaries y -50 50 r
+
+### General reactions
+
+mol 16 AAhungry u u
+mol 0 ABhungry u u
+mol 16 BBhungry u u
+mol 50 food u u
+
+variable full = 0.5
+variable hangry = 1.5
+
+difc AAfull full
+difc ABfull full
+difc BBfull full
+difc AAhungry hangry
+difc ABhungry hangry
+difc BBhungry hangry
+
+reaction foodproduction 0 -> food 10^-5.2
+reaction decay food -> 0 10^-3.8
+
+define matingbaseprob 10^-1
+define s1 1
+define s2 1
+define s3 1
+
+variable mating1rate = (s1^2)*matingbaseprob
+variable mating2rate = s1*s2*matingbaseprob
+variable mating3rate = s1*s3*matingbaseprob
+variable mating4rate = (s2^2)*matingbaseprob
+variable mating5rate = s2*s3*matingbaseprob
+variable mating6rate = (s3^2)*matingbaseprob
+
+reaction mating1 AAfull + AAfull -> AAAA mating1rate
+reaction mating2 AAfull + ABfull -> AAAB mating2rate
+reaction mating3 AAfull + BBfull -> AABB mating3rate
+reaction mating4 ABfull + ABfull -> ABAB mating4rate
+reaction mating5 ABfull + BBfull -> ABBB mating5rate
+reaction mating6 BBfull + BBfull -> BBBB mating6rate
+
+define offspring 1
+
+# Treating offspring as hungry to have high chance of death in 'juvenile' period
+
+variable offfive = 0.5*offspring
+variable offtwo = 0.25*offspring  
+
+reaction offspring1 AAAA -> AAhungry + AAhungry + AAhungry offspring
+reaction offspring2b AAAB -> AAhungry + ABhungry + ABhungry offfive
+reaction offspring2a AAAB -> AAhungry + ABhungry + AAhungry offfive
+reaction offspring3a ABAB -> ABhungry + ABhungry + ABhungry offfive
+reaction offspring3c ABAB -> ABhungry + ABhungry + BBhungry offtwo
+reaction offspring3b ABAB -> ABhungry + ABhungry + AAhungry offtwo
+reaction offspring4b ABBB -> ABhungry + BBhungry + BBhungry offfive
+reaction offspring4a ABBB -> ABhungry + BBhungry + ABhungry offfive
+reaction offspring5 BBBB -> BBhungry + BBhungry + BBhungry offspring
+reaction offspring6 AABB -> AAhungry + BBhungry + ABhungry offspring
+
+variable appetite = 10^-3 # 3
+
+reaction hungryAAfull AAfull -> AAhungry appetite
+reaction hungryABfull ABfull -> ABhungry appetite
+reaction hungryBBfull BBfull -> BBhungry appetite
+
+variable death = 10^-3.3 # 5
+
+reaction hungryAAhungry AAhungry -> 0 death
+reaction hungryABhungry ABhungry -> 0 death
+reaction hungryBBhungry BBhungry -> 0 death
+
+### Surfaces
+
+start_surface Outline1
+action all both reflect
+color both purple 1
+polygon both edge
+panel rect +1 -50 50 100
+panel rect +1 -50 -50 100
+panel rect +0 -50 -50 100
+end_surface
+
+start_surface Outline2
+action all both reflect
+color both purple 1
+polygon both edge
+panel rect +1 50 50 100
+panel rect +1 50 -50 100
+#panel rect +0 150 -50 100
+end_surface
+
+start_surface Outline3
+action all both reflect
+color both purple 1
+polygon both edge
+panel rect +1 150 50 100
+panel rect +1 150 -50 100
+panel rect +0 250 -50 100
+end_surface
+
+start_surface WesternPass
+#action all both reflect
+color both red 1
+polygon both edge
+rate all fsoln bsoln 7*10^-4
+rate all bsoln fsoln 7*10^-4
+panel rect +0 50 -50 100
+end_surface
+
+start_surface EasternPass
+#action all both reflect
+color both red 1
+polygon both edge
+rate all fsoln bsoln 7*10^-4
+rate all bsoln fsoln 7*10^-4
+panel rect +0 150 -50 100
+end_surface
+
+
+### Compartments
+
+start_compartment Tule
+surface Outline1
+surface WesternPass
+point 0 0
+end_compartment
+
+start_compartment Lava
+surface Outline2
+surface WesternPass
+surface EasternPass
+point 100 0
+end_compartment
+
+start_compartment ONeils
+surface Outline3
+surface EasternPass
+point 200 0
+end_compartment
+
+
+### Compartment Specific Reactions 
+
+define R1baseEating 1 #3
+define R1s11 5
+define R1s12 5
+define R1s22 0
+
+variable R1eating1 = (1+R1s11)*R1baseEating
+variable R1eating2 = (1+R1s12)*R1baseEating
+variable R1eating3 = (1+R1s22)*R1baseEating
+
+reaction compartment=Tule R1foodAA AAhungry + food -> AAfull R1eating1
+reaction compartment=Tule R1foodAB ABhungry + food -> ABfull R1eating2
+reaction compartment=Tule R1foodBB BBhungry + food -> BBfull R1eating3
+
+define R2baseEating 1 #3
+define R2s11 0
+define R2s12 0
+define R2s22 5
+
+variable R2eating1 = (1+R2s11)*R2baseEating
+variable R2eating2 = (1+R2s12)*R2baseEating
+variable R2eating3 = (1+R2s22)*R2baseEating
+
+reaction compartment=Lava R2foodAA AAhungry + food -> AAfull R2eating1
+reaction compartment=Lava R2foodAB ABhungry + food -> ABfull R2eating2
+reaction compartment=Lava R2foodBB BBhungry + food -> BBfull R2eating3
+
+define R3baseEating 1 #3
+define R3s11 5
+define R3s12 5
+define R3s22 0
+
+variable R3eating1 = (1+R3s11)*R3baseEating
+variable R3eating2 = (1+R3s12)*R3baseEating
+variable R3eating3 = (1+R3s22)*R3baseEating
+
+reaction compartment=ONeils R3foodAA AAhungry + food -> AAfull R3eating1
+reaction compartment=ONeils R3foodAB ABhungry + food -> ABfull R3eating2
+reaction compartment=ONeils R3foodBB BBhungry + food -> BBfull R3eating3
+
+
+cmd b pause
+
+#output_files test.txt
+#cmd i 0 100000 10 molcount test.txt
+
+end_file
