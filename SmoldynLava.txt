@@ -2,7 +2,7 @@
 
 random_seed 1
 
-graphics opengl_good
+#graphics opengl_good
 
 dim 2
 species AAfull AAhungry ABfull ABhungry BBfull BBhungry AAAA AAAB ABAB AABB ABBB BBBB food  
@@ -18,11 +18,9 @@ color ABhungry red
 color BBfull yellow
 color BBhungry yellow
 color food green 
-color foods green 
 
 display_size all 2
 display_size food 0.5
-display_size foods 0.5
 
 boundaries x -50 250 r
 boundaries y -50 50 r
@@ -67,8 +65,6 @@ reaction mating5 ABfull + BBfull -> ABBB mating5rate
 reaction mating6 BBfull + BBfull -> BBBB mating6rate
 
 define offspring 1
-
-# Treating offspring as hungry to have high chance of death in 'juvenile' period
 
 variable offfive = 0.5*offspring
 variable offtwo = 0.25*offspring  
@@ -208,9 +204,9 @@ reaction compartment=ONeils R3foodAB ABhungry + food -> ABfull R3eating2
 reaction compartment=ONeils R3foodBB BBhungry + food -> BBfull R3eating3
 
 
-cmd b pause
+#cmd b pause
 
-#output_files test.txt
-#cmd i 0 100000 10 molcount test.txt
+output_files test.txt
+cmd i 0 100000 10 molcount test.txt
 
 end_file
