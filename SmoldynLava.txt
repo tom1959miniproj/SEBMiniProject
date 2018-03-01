@@ -1,6 +1,6 @@
 ## Box with particles
 
-random_seed 1
+#random_seed 1
 
 #graphics opengl_good
 
@@ -27,9 +27,9 @@ boundaries y -50 50 r
 
 ### General reactions
 
-mol 16 AAhungry u u
-mol 0 ABhungry u u
-mol 16 BBhungry u u
+mol 100 AAhungry u u
+mol 100 ABhungry u u
+mol 100 BBhungry u u
 mol 50 food u u
 
 variable full = 0.5
@@ -125,8 +125,8 @@ start_surface WesternPass
 #action all both reflect
 color both red 1
 polygon both edge
-rate all fsoln bsoln 7*10^-4
-rate all bsoln fsoln 7*10^-4
+rate all fsoln bsoln 7.0*10^-4 # Lava to Tule rate
+rate all bsoln fsoln 2.1*10^-3 # Tule to Lava rate
 panel rect +0 50 -50 100
 end_surface
 
@@ -134,8 +134,8 @@ start_surface EasternPass
 #action all both reflect
 color both red 1
 polygon both edge
-rate all fsoln bsoln 7*10^-4
-rate all bsoln fsoln 7*10^-4
+rate all fsoln bsoln 7.5*10^-3 # ONeils to Lava rate
+rate all bsoln fsoln 7.3*10^-4 # Lava to ONeils rate
 panel rect +0 150 -50 100
 end_surface
 
@@ -164,9 +164,10 @@ end_compartment
 
 ### Compartment Specific Reactions 
 
+## Tule
 define R1baseEating 1 #3
-define R1s11 5
-define R1s12 5
+define R1s11 0
+define R1s12 0
 define R1s22 0
 
 variable R1eating1 = (1+R1s11)*R1baseEating
@@ -177,10 +178,12 @@ reaction compartment=Tule R1foodAA AAhungry + food -> AAfull R1eating1
 reaction compartment=Tule R1foodAB ABhungry + food -> ABfull R1eating2
 reaction compartment=Tule R1foodBB BBhungry + food -> BBfull R1eating3
 
+
+## Lava
 define R2baseEating 1 #3
 define R2s11 0
 define R2s12 0
-define R2s22 5
+define R2s22 -0.389
 
 variable R2eating1 = (1+R2s11)*R2baseEating
 variable R2eating2 = (1+R2s12)*R2baseEating
@@ -190,9 +193,11 @@ reaction compartment=Lava R2foodAA AAhungry + food -> AAfull R2eating1
 reaction compartment=Lava R2foodAB ABhungry + food -> ABfull R2eating2
 reaction compartment=Lava R2foodBB BBhungry + food -> BBfull R2eating3
 
+
+## ONeils
 define R3baseEating 1 #3
-define R3s11 5
-define R3s12 5
+define R3s11 0
+define R3s12 0
 define R3s22 0
 
 variable R3eating1 = (1+R3s11)*R3baseEating
@@ -207,6 +212,6 @@ reaction compartment=ONeils R3foodBB BBhungry + food -> BBfull R3eating3
 #cmd b pause
 
 output_files test.txt
-cmd i 0 100000 10 molcount test.txt
+cmd i 0 100000 10 molcountincmpts Tule Lava ONeils test.txt
 
 end_file
